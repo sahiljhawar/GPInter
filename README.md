@@ -1,6 +1,6 @@
 # GPInter
 
-Gaussian Process from scratch with interactive visualization.
+Gaussian Processes from scratch with interactive visualization.
 
 ## Install requirements
 ```bash
