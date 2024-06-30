@@ -1,5 +1,6 @@
 import numpy as np
-from gp import GaussianProcess, RBFKernel, PeriodicKernel, RationalQuadraticKernel
+from gp import GaussianProcess
+from kernel import RBFKernel, PeriodicKernel, RationalQuadraticKernel
 from plot import plot_gp
 
 np.random.seed(1840319)
@@ -25,5 +26,3 @@ print(gp1.kernel)
 print(gp2.kernel)
 print(gp3.kernel)
 plot_gp([gp1, gp2, gp3], X_pred)
-# plot_gp(gp3, X_pred)
-# plot_gp(gp3, X_pred)

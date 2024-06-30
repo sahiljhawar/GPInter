@@ -19,12 +19,13 @@ def plot_gp(
 ):
     if not isinstance(gp_list, list):
         gp_list = [gp_list]
-    global shared_X, shared_Y
+    global shared_X, shared_Y, shared_Y_err
 
     fig, ax = plt.subplots(figsize=(10, 6))
 
     current_gp = gp_list[0]
     Y_init, X_init = current_gp.Y.copy(), current_gp.X.copy()
+    Y_err_init = current_gp.Y_err.copy()
     kernel_init = {gp: gp.kernel.get_params() for gp in gp_list}
 
     if len(gp_list) > 1:
@@ -35,6 +36,9 @@ def plot_gp(
 
     shared_X = np.array(gp_list[0].X)
     shared_Y = np.array(gp_list[0].Y)
+    shared_Y_err = np.array(gp_list[0].Y_err).flatten()
+
+    print(shared_Y_err.shape)
 
     def plot(ax, gp):
         ax.clear()
@@ -73,7 +77,7 @@ def plot_gp(
         ax.errorbar(
             gp.X.reshape(_reshape_to),
             gp.Y.reshape(_reshape_to),
-            yerr=np.abs(gp.Y_err.reshape(_reshape_to)),
+            yerr=np.abs(gp.Y_err.flatten()),
             fmt="o",
             color=tomato,
             zorder=10,
@@ -84,14 +88,25 @@ def plot_gp(
     plot(ax, current_gp)
 
     def on_click(event):
-        global shared_X, shared_Y
+        global shared_X, shared_Y, shared_Y_err
         if event.button == 1 and ax.contains(event)[0]:
             x_new = np.array([[event.xdata]])
             y_new = np.array([[event.ydata]])
+            y_err_new = np.array([0])
             shared_X = np.vstack((shared_X, x_new))
             shared_Y = np.vstack((shared_Y, y_new))
+
+            print("before")
+            print(y_err_new.shape)
+            print(shared_Y_err.shape)
+
+            shared_Y_err = np.concatenate((shared_Y_err, y_err_new))
+            print("after")
+            print(y_err_new.shape)
+            print(shared_Y_err.shape)
+
             for gp in gp_list:
-                gp.update_data(shared_X, shared_Y)
+                gp.update_data(shared_X, shared_Y, shared_Y_err)
             update_plot()
 
         elif event.button == 3 and ax.contains(event)[0]:
@@ -100,9 +115,11 @@ def plot_gp(
                 idx = np.argmin(dists)
                 shared_X = np.delete(shared_X, idx, axis=0)
                 shared_Y = np.delete(shared_Y, idx, axis=0)
+                shared_Y_err = np.delete(shared_Y_err, idx)
                 for gp in gp_list:
                     gp.X = shared_X
                     gp.Y = shared_Y
+                    gp.Y_err = shared_Y_err
                 update_plot()
 
     def update_plot():
@@ -110,10 +127,12 @@ def plot_gp(
         fig.canvas.draw()
 
     def reset(event):
-        global shared_X, shared_Y
+        global shared_X, shared_Y, shared_Y_err
         shared_X, shared_Y = X_init.copy(), Y_init.copy()
+        shared_Y_err = Y_err_init.copy()
         for gp in gp_list:
             gp.X, gp.Y = shared_X.copy(), shared_Y.copy()
+            gp.Y_err = shared_Y_err.copy()
             gp.kernel.set_params(**kernel_init[gp])
         update_sliders(kernel_init[current_gp])
         update_plot()
@@ -162,7 +181,7 @@ def plot_gp(
     create_sliders(current_gp.kernel.get_params())
 
     if len(gp_list) > 1:
-        kernel_names = [str(gp.kernel) for gp in gp_list]
+        kernel_names = [str(gp.kernel.__class__.__name__) for gp in gp_list]
         kernel_selector_ax = plt.axes((0.1, 0.90, 0.8, 0.06))
         kernel_selector = MyRadioButtons(kernel_selector_ax, kernel_names, orientation="horizontal", fontsize=15, size=60)
 
@@ -170,6 +189,7 @@ def plot_gp(
             nonlocal current_gp
             current_gp = gp_list[kernel_names.index(label)]
             current_gp.X, current_gp.Y = shared_X, shared_Y
+            current_gp.Y_err = shared_Y_err
             create_sliders(current_gp.kernel.get_params())
             update_plot()
 
