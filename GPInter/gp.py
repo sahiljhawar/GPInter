@@ -115,9 +115,3 @@ class GaussianProcess:
     def update_data(self, X_new, Y_new):
         self.X = np.vstack((self.X, X_new))
         self.Y = np.vstack((self.Y, Y_new))
-
-    # implememnt a bestfit function which will tune the hyperparameters of the kernel and performs a MLE to find the best hyperparameters
-    # def bestfit(self):
-
-    # https://towardsdatascience.com/gaussian-process-kernels-96bafb4dd63e
-    # https://github.com/krasserm/bayesian-machine-learning/blob/dev/gaussian-processes/gaussian_processes.ipynb
