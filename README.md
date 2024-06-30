@@ -13,10 +13,6 @@ cd GPInter
 python main.py
 ```
 
-or 
-
-Run the notebook `main.ipynb`
-
 - `Left click` on the plot to add a new point (new points are added with 0 error)
 - `Right click `on the plot to remove a point (deletes the nearest point to cursor)
 - Use `sliders` to change length scale and amplitude (+ other kernel parameters if available)
