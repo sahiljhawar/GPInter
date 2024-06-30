@@ -38,8 +38,6 @@ def plot_gp(
     shared_Y = np.array(gp_list[0].Y)
     shared_Y_err = np.array(gp_list[0].Y_err).flatten()
 
-    print(shared_Y_err.shape)
-
     def plot(ax, gp):
         ax.clear()
         ax.grid(True)
@@ -95,15 +93,7 @@ def plot_gp(
             y_err_new = np.array([0])
             shared_X = np.vstack((shared_X, x_new))
             shared_Y = np.vstack((shared_Y, y_new))
-
-            print("before")
-            print(y_err_new.shape)
-            print(shared_Y_err.shape)
-
             shared_Y_err = np.concatenate((shared_Y_err, y_err_new))
-            print("after")
-            print(y_err_new.shape)
-            print(shared_Y_err.shape)
 
             for gp in gp_list:
                 gp.update_data(shared_X, shared_Y, shared_Y_err)
