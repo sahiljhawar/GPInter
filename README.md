@@ -29,3 +29,4 @@ Run the notebook `main.ipynb`
 - [x] Implement more kernels
 - [x] Drop down menu to choose different kernels on the fly
 - [ ] (Re)Implement `plot_gp` for notebook
+- [ ] Implement kernel operations (maybe at the cost of interactivity)
