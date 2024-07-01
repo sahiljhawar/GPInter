@@ -3,8 +3,6 @@ from scipy.linalg import solve_triangular
 from scipy.optimize import minimize
 
 
-
-
 class GaussianProcess:
     def __init__(self, X, Y, Y_err, noise=1e-3, kernel=None):
         self.X = X
@@ -42,7 +40,6 @@ class GaussianProcess:
             except ValueError as e:
                 print(f"Invalid value for {params}: {e}. Re-setting to initial value = {self.init_params}.")
                 self.kernel.set_params(**dict(zip(self.kernel.get_params().keys(), list(self.init_params.values()))))
-            
 
         K = self.kernel.compute(self.X, self.X)
         K += np.diag(self.Y_err**2)
@@ -57,7 +54,6 @@ class GaussianProcess:
 
         return np.sum(np.log(np.diag(L))) + 0.5 * self.Y.T.dot(S2) + 0.5 * len(self.X) * np.log(2 * np.pi)
 
-    
     def optimize(self, set_optimized_params=False):
 
         if self._neg_log_likelihood is None:
@@ -69,13 +65,8 @@ class GaussianProcess:
             callback_params.append(x.copy())
 
         initial_params = list(self.kernel.get_params().values())
-        
-        opt_result = minimize(
-            fun=self.neg_log_likelihood,
-            x0=initial_params,
-            method="L-BFGS-B",
-            callback=_store_callback
-        )
+
+        opt_result = minimize(fun=self.neg_log_likelihood, x0=initial_params, method="L-BFGS-B", callback=_store_callback)
 
         optimized_params = dict(zip(self.kernel.get_params().keys(), opt_result.x))
 
@@ -85,5 +76,3 @@ class GaussianProcess:
         self.callback_params = callback_params
 
         return optimized_params
-        
-    

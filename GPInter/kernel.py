@@ -11,13 +11,13 @@ class Kernel(ABC):
     def __str__(self):
         params = [f"{key}={value}" for key, value in self.get_params().items()]
         return f"{self.__class__.__name__}({', '.join(params)})"
-    
+
     def __mul__(self, other):
         if isinstance(other, Kernel):
             return ProductKernel([self, other])
         else:
             raise ValueError("Can only multiply Kernel with another Kernel")
-        
+
     def __add__(self, other):
         if isinstance(other, Kernel):
             return SumKernel([self, other])
@@ -100,13 +100,12 @@ class RationalQuadraticKernel(Kernel):
         return self.amplitude**2 * (1 + self.euclid_dist(x1, x2) ** 2 / (2 * self.alpha * self.length_scale**2)) ** (
             -self.alpha
         )
-    
+
 
 class ProductKernel(Kernel):
     def __init__(self, kernels):
         super().__init__()
         self.kernels = kernels
-
 
     def __str__(self):
         return " * ".join(str(kernel) for kernel in self.kernels)
@@ -119,10 +118,10 @@ class ProductKernel(Kernel):
                 return ProductKernel(self.kernels + [other])
         else:
             raise ValueError("Can only multiply Kernel with another Kernel")
-        
+
     def compute(self, x1, x2):
         return np.prod([kernel.compute(x1, x2) for kernel in self.kernels], axis=0)
-    
+
 
 class SumKernel(Kernel):
     def __init__(self, kernels):
@@ -140,6 +139,6 @@ class SumKernel(Kernel):
                 return SumKernel(self.kernels + [other])
         else:
             raise ValueError("Can only add Kernel with another Kernel")
-        
+
     def compute(self, x1, x2):
         return np.sum([kernel.compute(x1, x2) for kernel in self.kernels], axis=0)
