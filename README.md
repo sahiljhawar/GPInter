@@ -25,6 +25,6 @@ python main.py
 - [x] Implement more kernels
 - [x] Drop down menu to choose different kernels on the fly
 - [ ] (Re)Implement `plot_gp` for notebook
-- [ ] Implement kernel operations (maybe at the cost of interactivity)
-- [ ] Implement hyperparameter optimization
+- [x] Implement kernel operations (maybe at the cost of interactivity)
+- [x] Implement hyperparameter optimization
 - [ ] Add tests (does it need one?)
