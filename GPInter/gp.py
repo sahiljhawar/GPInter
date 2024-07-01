@@ -13,6 +13,7 @@ class GaussianProcess:
         self.noise = noise
         self.kernel = kernel
         self.init_params = self.kernel.get_params()
+        self._neg_log_likelihood = self.neg_log_likelihood()
 
     def __repr__(self):
         return f"{self.__class__.__name__}(X={self.X}, Y={self.Y}, noise={self.noise}, kernel={self.kernel})"
@@ -46,15 +47,21 @@ class GaussianProcess:
         K = self.kernel.compute(self.X, self.X)
         K += np.diag(self.Y_err**2)
         K += self.noise * np.eye(len(self.X))
-
-        L = np.linalg.cholesky(K)
-
+        try:
+            L = np.linalg.cholesky(K)
+        except np.linalg.LinAlgError as e:
+            print(f"Optimization failed due to a LinAlgError: {e} while computing the Cholesky decomposition.")
+            return None
         S1 = solve_triangular(L, self.Y, lower=True)
         S2 = solve_triangular(L.T, S1, lower=False)
 
         return np.sum(np.log(np.diag(L))) + 0.5 * self.Y.T.dot(S2) + 0.5 * len(self.X) * np.log(2 * np.pi)
+
     
     def optimize(self, set_optimized_params=False):
+
+        if self._neg_log_likelihood is None:
+            return None
 
         callback_params = []
 
@@ -62,7 +69,7 @@ class GaussianProcess:
             callback_params.append(x.copy())
 
         initial_params = list(self.kernel.get_params().values())
-
+        
         opt_result = minimize(
             fun=self.neg_log_likelihood,
             x0=initial_params,
