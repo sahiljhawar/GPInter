@@ -27,3 +27,4 @@ python main.py
 - [ ] (Re)Implement `plot_gp` for notebook
 - [ ] Implement kernel operations (maybe at the cost of interactivity)
 - [ ] Implement hyperparameter optimization
+- [ ] Add tests (does it need one?)
