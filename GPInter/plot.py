@@ -1,7 +1,19 @@
+import matplotlib
+
+backends = [
+    #  'MacOSX',
+    # 'QtAgg',
+    "Qt5Agg",
+    # 'WebAgg',
+]
+
+matplotlib.use(backends[0])
+
 import matplotlib.pyplot as plt
 from matplotlib.widgets import Slider, Button
 import numpy as np
 from radiobuttons import MyRadioButtons
+
 
 deep_blue = "#00008B"
 tomato = "#D5120D"
@@ -127,9 +139,19 @@ def plot_gp(
         update_sliders(kernel_init[current_gp])
         update_plot()
 
+    def optimize(event):
+        opt_params = current_gp.optimize()
+        print(f"Optimized parameters: {opt_params}")
+        update_sliders(current_gp.kernel.get_params())
+        update_plot()
+
     reset_button_ax = plt.axes([0.85, 0.10, 0.1, 0.04])
     reset_button = Button(reset_button_ax, "Reset", color="lightgoldenrodyellow", hovercolor="0.975")
     reset_button.on_clicked(reset)
+
+    optimize_button_ax = plt.axes([0.85, 0.05, 0.1, 0.04])
+    optimize_button = Button(optimize_button_ax, "Optimize", color="lightgoldenrodyellow", hovercolor="0.975")
+    optimize_button.on_clicked(optimize)
 
     fig.canvas.mpl_connect("button_press_event", on_click)
 
@@ -168,7 +190,11 @@ def plot_gp(
         for param, value in kernel_params.items():
             sliders[param].set_val(value)
 
-    create_sliders(current_gp.kernel.get_params())
+    def is_composite_kernel(kernel):
+        return kernel.__class__.__name__ in ["ProductKernel", "SumKernel"]
+
+    if not is_composite_kernel(current_gp.kernel):
+        create_sliders(current_gp.kernel.get_params())
 
     if len(gp_list) > 1:
         kernel_names = [str(gp.kernel.__class__.__name__) for gp in gp_list]
@@ -180,7 +206,13 @@ def plot_gp(
             current_gp = gp_list[kernel_names.index(label)]
             current_gp.X, current_gp.Y = shared_X, shared_Y
             current_gp.Y_err = shared_Y_err
-            create_sliders(current_gp.kernel.get_params())
+            if not is_composite_kernel(current_gp.kernel):
+                create_sliders(current_gp.kernel.get_params())
+            else:
+                for ax in slider_axes.values():
+                    ax.remove()
+                slider_axes.clear()
+                sliders.clear()
             update_plot()
 
         kernel_selector.on_clicked(change_kernel)
